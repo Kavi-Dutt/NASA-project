@@ -24,7 +24,7 @@ function httpAddNewLaunch(req, res) {
     
     addNewLaunch(launch);
 
-    res.status(201).json(getAllLaunches());
+    res.status(201).json(launch);
 }
 
 function httpAbbortLaunch(req, res){

@@ -18,8 +18,10 @@ const launchesSchema = new mongoose.Schema({
     },
     target: {
         type: String,
+        required: true,
 
     },
+    customer: [String],
     upcoming: {
         type: Boolean,
         required: true,
@@ -31,3 +33,5 @@ const launchesSchema = new mongoose.Schema({
     },
 
 })
+
+module.exports = mongoose.model('Launch', launchesSchema);

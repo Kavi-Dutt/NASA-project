@@ -5,8 +5,8 @@ const {
     abbortLaunchById,
 } = require('../../models/launches.model');
 
-function httpgetAllLunches(req, res) {
-    res.status(200).json(getAllLaunches());
+async function httpgetAllLunches(req, res) {
+    res.status(200).json(await getAllLaunches());
 }
 
 function httpAddNewLaunch(req, res) {

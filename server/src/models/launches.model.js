@@ -1,3 +1,5 @@
+const launchesDatabase = require('./launches.mongo');
+const planets = require('./planets.mongo');
 const launches = new Map();
 let startingFlightNumber = 121;
 const launch = {
@@ -12,13 +14,16 @@ const launch = {
 
 }
 
-launches.set(launch.flightNumber, launch);
+saveLaunch(launch);
 
 function checkLaunchExistById(id) {
     return launches.has(id);
 }
-function getAllLaunches() {
-    return Array.from(launches.values());
+async function getAllLaunches() {
+    return await launchesDatabase.find({}, {
+        '_id': 0,
+        '__v': 0
+    })
 }
 
 function addNewLaunch(launch) {
@@ -31,7 +36,22 @@ function addNewLaunch(launch) {
     }))
 }
 
-function abbortLaunchById(id){
+async function saveLaunch(launch) {
+    const planet = planets.findOne({ keplerName: launch.target });
+    if (!planet) {
+        throw new Error('Planet name not contain in habitable planet list');
+    } else {
+        await launchesDatabase.updateOne(
+            {
+                flightNumber: launch.flightNumber,
+            }, launch, {
+            upsert: true,
+        }
+        )
+    }
+}
+
+function abbortLaunchById(id) {
     const abort = launches.get(id);
     abort.upcoming = false;
     abort.success = false;

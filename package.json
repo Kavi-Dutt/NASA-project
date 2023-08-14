@@ -11,7 +11,8 @@
     "client": "npm start --prefix client",
     "watch": "npm run server & npm run client",
     "deploy": "npm run build --prefix client && npm run start --prefix server",
-    "test": "jest --watch"
+    "deploy-cluster": "npm run build --prefix client && npm run cluster --prefix server",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",

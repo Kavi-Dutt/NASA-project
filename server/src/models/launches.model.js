@@ -1,7 +1,7 @@
 const launchesDatabase = require('./launches.mongo');
 const planets = require('./planets.mongo');
 const launches = new Map();
-let startingFlightNumber = 121;
+const Default_Flight_NUMBER = 121;
 const launch = {
     flightNumber: 121,
     mission: 'explore 442 b',
@@ -19,6 +19,17 @@ saveLaunch(launch);
 function checkLaunchExistById(id) {
     return launches.has(id);
 }
+
+async function getLatestFligtNumber() {
+    const latestLaunch = await launchesDatabase.findOne().sort('-flightNumber');
+
+    if (!latestLaunch) {
+        return Default_Flight_NUMBER;
+    }
+
+    return latestLaunch.flightNumber;
+}
+
 async function getAllLaunches() {
     return await launchesDatabase.find({}, {
         '_id': 0,
@@ -26,29 +37,36 @@ async function getAllLaunches() {
     })
 }
 
-function addNewLaunch(launch) {
-    startingFlightNumber++
-    launches.set(startingFlightNumber, Object.assign(launch, {
-        flightNumber: startingFlightNumber,
+async function scheduleNewLaunch(launch) {
+    const planet = await planets.findOne({ 
+        keplerName: launch.target 
+    });
+
+    if (!planet) {
+        throw new Error('target planet does not exist in habitable planet list');
+    }
+
+    const newFlightNumber = await getLatestFligtNumber() + 1;
+
+    const newLaunch = Object.assign(launch,{
+        flightNumber: newFlightNumber,
         customer: ['Tech Karma', 'spaceX'],
         upcoming: true,
         success: true,
-    }))
+    });
+
+    await saveLaunch(newLaunch);
+
 }
 
 async function saveLaunch(launch) {
-    const planet = planets.findOne({ keplerName: launch.target });
-    if (!planet) {
-        throw new Error('Planet name not contain in habitable planet list');
-    } else {
-        await launchesDatabase.updateOne(
-            {
-                flightNumber: launch.flightNumber,
-            }, launch, {
-            upsert: true,
-        }
-        )
+    await launchesDatabase.findOneAndUpdate(
+        {
+            flightNumber: launch.flightNumber,
+        }, launch, {
+        upsert: true,
     }
+    )
 }
 
 function abbortLaunchById(id) {
@@ -61,6 +79,6 @@ function abbortLaunchById(id) {
 module.exports = {
     checkLaunchExistById,
     getAllLaunches,
-    addNewLaunch,
+    scheduleNewLaunch,
     abbortLaunchById,
 }

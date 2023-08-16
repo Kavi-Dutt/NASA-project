@@ -1,7 +1,7 @@
 const {
     checkLaunchExistById,
     getAllLaunches,
-    addNewLaunch,
+    scheduleNewLaunch,
     abbortLaunchById,
 } = require('../../models/launches.model');
 
@@ -9,7 +9,7 @@ async function httpgetAllLunches(req, res) {
     res.status(200).json(await getAllLaunches());
 }
 
-function httpAddNewLaunch(req, res) {
+async function httpAddNewLaunch(req, res) {
     let launch = req.body;
 
     if(!launch.launchDate || !launch.mission || !launch.rocket || !launch.target){
@@ -22,7 +22,12 @@ function httpAddNewLaunch(req, res) {
         return res.status(400).json({error: 'date is not proper'});
     }
     
-    addNewLaunch(launch);
+    try{
+        await scheduleNewLaunch(launch);
+    } catch(error){
+         console.log(error);
+        return res.status(404).json({error: error.message});
+    }
 
     res.status(201).json(launch);
 }

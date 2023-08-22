@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
-const MONGO_URL = 'mongodb+srv://nasa-api:liZJhmnn2ZjlFF6U@cluster1.mxsaicj.mongodb.net/nasa?retryWrites=true&w=majority';
+require('dotenv').config();
+
+const MONGO_URL = process.env.MONGO_URL;
 
 mongoose.connection.once('conection', ()=>{
     console.log('connected to server');
-
 });
 
 mongoose.connection.on('error', (err)=>{
